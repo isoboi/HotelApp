@@ -23,19 +23,19 @@ export class HotelService {
   }
 
   createHotel(body: Partial<HotelModel>): Observable<HotelModel> {
-    return this._http.post<HotelModel>(this._url + 'api/app/hotel', body);
+    return this._http.post<HotelModel>(this._url + '/api/app/hotel', body);
   }
 
   deleteHotel(hotelId: string): Observable<any> {
-    return this._http.delete<any>(this._url + `api/app/hotel/${hotelId}`);
+    return this._http.delete<any>(this._url + `/api/app/hotel/${hotelId}`);
   }
 
   getHotelCategories(hotelId: string): Observable<HttpDataResp<HotelCategoryModel>> {
-    return this._http.get<HttpDataResp<HotelCategoryModel>>(this._url + '/api/app/category');
+    return this._http.get<HttpDataResp<HotelCategoryModel>>(this._url + `/api/app/category?${hotelId}`);
   }
 
   createHotelCategory(body: Partial<HotelCategoryModel>): Observable<HotelCategoryModel> {
-    return this._http.post<HotelCategoryModel>(this._url + 'api/app/category', body);
+    return this._http.post<HotelCategoryModel>(this._url + '/api/app/category', body);
   }
 
 }

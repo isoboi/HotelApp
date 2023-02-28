@@ -1,41 +1,159 @@
 <div class="container">
-  <div class="card">
-    <div class="card-header">
-      <h5 class="card-title">
-        {{ '::Welcome_Title' | abpLocalization }}
-      </h5>
-    </div>
-    <div class="card-body">
-      {{ '::Welcome_Text' | abpLocalization }}
-    </div>
-  </div>
   <div class="card mt-5">
+    <div class="card-header d-flex justify-content-between">
+      <h5 class="card-title">
+        Список гостиниц
+      </h5>
+
+      <button class="btn btn-primary" (click)="isHotelModalOpen = true">
+        <i class="fa fa-plus mr-5"></i>
+        Добавить гоcтиницу</button>
+    </div>
     <div class="card-body">
       <div class="row">
-        <div class="col-md-auto text-center">
-          <img src="https://abp.io/assets/png/mastering-abp-framework.webp" style="max-width: 400px;"
-               class="w-100 mb-5 my-md-3">
-        </div>
-        <div class="col-md d-flex align-items-center">
-          <div class="pe-0 pe-md-4">
-            <small class="text-uppercase text-muted">THE OFFICIAL GUIDE</small>
-            <h2 class="mb-4">Mastering ABP Framework</h2>
-            <p class="mb-4">Written by the creator of the ABP Framework, this book will help you gain a complete
-              understanding of the framework and modern web application development techniques.</p>
-            <div class="mb-4">
-              <a href="https://www.amazon.com/gp/product/B097Z2DM8Q/ref=dbs_a_def_rwt_hsch_vapi_tkin_p1_i0"
-                 class="btn btn-success mb-1">
-                Buy on Amazon US
+        <ngx-datatable
+          #myTable
+          class="material expandable"
+          [rows]="hotelList"
+          [loadingIndicator]="dataLoading"
+          [headerHeight]="50"
+          [footerHeight]="50"
+          rowHeight="auto"
+          [limit]="10"
+        >
+          <!-- Row Detail Template -->
+          <ngx-datatable-row-detail
+            rowHeight="auto">
+            <ng-template ngx-datatable-row-detail-template>
+              <ngx-datatable
+                class="material expandable"
+                [rows]="hotelCategoryList"
+                [headerHeight]="50"
+                rowHeight="auto">
+                <ngx-datatable-column name="Name" [minWidth]='300'>
+                  <ng-template let-value="value" ngx-datatable-cell-template>
+                    <strong>{{ value }}</strong>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="Area" [minWidth]='300'>
+                  <ng-template let-value="value" ngx-datatable-cell-template>
+                    <strong>{{ value }}</strong>
+                  </ng-template>
+                </ngx-datatable-column>
+              </ngx-datatable>
+              <button class="btn btn-primary mt-1 " (click)="isCategoryModalOpen = true">
+                <i class="fa fa-plus"></i>
+                Добавить категорию</button>
+            </ng-template>
+          </ngx-datatable-row-detail>
+          <!-- Column Templates -->
+          <ngx-datatable-column
+            name='Room category'
+            [resizeable]="false"
+            [sortable]="false"
+            [draggable]="false"
+            [canAutoResize]="false">
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
+              <a
+                href="javascript:void(0)"
+                [class.datatable-icon-right]="!expanded"
+                [class.datatable-icon-down]="expanded"
+                (click)="toggleExpandRow(row)">
               </a>
-              &nbsp;
-              <a href="https://www.packtpub.com/product/mastering-abp-framework/9781801079242"
-                 class="btn btn-primary mb-1">
-                Buy on PACKT
-              </a>
-            </div>
-          </div>
-        </div>
+            </ng-template>
+          </ngx-datatable-column>
+
+
+          <ngx-datatable-column name="Name" [width]='200'>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              <strong>{{ value }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Initial Price" [width]='200'>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              <strong>{{ value }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [sortable]='false' [width]='200'>
+            <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+              <button form="hotel-form" class="btn btn-danger" (click)='deleteHotel(row, rowIndex)'>
+                <i class="fa fa-trash-alt mr-1"></i>
+                Удалить
+              </button>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
       </div>
     </div>
   </div>
 </div>
+
+
+
+<abp-modal [(visible)]="isHotelModalOpen">
+  <ng-template #abpHeader>
+    <h3>Добавить гостинцу</h3>
+  </ng-template>
+
+  <ng-template #abpBody>
+    <form id="hotel-form" [formGroup]="hotelForm" (ngSubmit)="createHotel()">
+      <div class="form-group">
+        <label for="hotel-name">Название гостиницы</label><span> * </span>
+        <input type="text"  class="form-control" formControlName="name"  />
+      </div>
+
+      <div class="form-group">
+        <label for="hotel-siteUrl">Ссылка на сайт</label><span> * </span>
+        <input type="text" class="form-control" formControlName="siteUrl" />
+      </div>
+
+      <div class="form-group">
+        <label for="room-price">Цена от</label><span> * </span>
+        <input type="number"  class="form-control" formControlName="initialPrice" />
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #abpFooter>
+    <button type="button" class="btn btn-secondary" abpClose>
+      Отмена
+    </button>
+
+    <button form="hotel-form" class="btn btn-primary" [disabled]="hotelForm.invalid || hotelForm.pristine">
+      <i class="fa fa-check mr-1"></i>
+      Сохранить
+    </button>
+  </ng-template>
+</abp-modal>
+
+<abp-modal [(visible)]="isCategoryModalOpen">
+  <ng-template #abpHeader>
+    <h3>Добавить категорию</h3>
+  </ng-template>
+
+  <ng-template #abpBody let-row='row'>
+    <form id="hotel-category-form" [formGroup]="hotelCategoryForm" (ngSubmit)="createHotelCategory()">
+      <div class="form-group">
+        <label for="hotel-category-name">Название комнаты</label><span> * </span>
+        <input type="text"  class="form-control" formControlName="name"/>
+      </div>
+
+
+      <div class="form-group">
+        <label for="hotel-category-area">Площадь кв.м.</label><span> * </span>
+        <input type="number"  class="form-control" formControlName="area" />
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #abpFooter>
+    <button type="button" class="btn btn-secondary" abpClose>
+      Отмена
+    </button>
+
+    <button form="hotel-category-form" class="btn btn-primary" [disabled]="hotelCategoryForm.invalid || hotelCategoryForm.pristine">
+      <i class="fa fa-check mr-1"></i>
+      Сохранить
+    </button>
+  </ng-template>
+</abp-modal>
